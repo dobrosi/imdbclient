@@ -37,7 +37,7 @@ public class ImdbClient {
             movie.image = getValue(doc, "image");
             String[] words = getValue(doc, "title").split(" ⭐ ");
             movie.year = words[0].split(" \\(")[1].split("\\)")[0];
-            movie.rating = words[1].split(" \\| ")[0];
+            movie.rating = words[1].split(" | ")[0];
             return movie;
         } catch (HttpStatusException e) {
             throw new ImdbRecordNotFound(imdbid, e.getStatusCode());
