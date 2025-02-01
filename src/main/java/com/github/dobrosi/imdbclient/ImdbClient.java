@@ -3,7 +3,6 @@ package com.github.dobrosi.imdbclient;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -51,7 +50,6 @@ public class ImdbClient {
     }
 
     private String getValue(Document document, String key) throws UnsupportedEncodingException {
-        return new String(document.selectXpath("//meta[@property=\"og:" + key + "\"]").attr("content").getBytes(),
-                          StandardCharsets.UTF_8);
+        return new String(document.selectXpath("//meta[@property=\"og:" + key + "\"]").attr("content").getBytes(), "UTF8");
     }
 }
