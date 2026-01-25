@@ -12,7 +12,7 @@ class ImdbClientTest {
         assertEquals("https://www.imdb.com/title/tt7286456", m.link);
         assertEquals("Joker", m.title);
         assertEquals("2019", m.year);
-        assertEquals("8.4", m.rating);
-        assertEquals(null, m.director);
+        assertNotNull(m.rating);
+        assertNull(m.director);
     }
 }

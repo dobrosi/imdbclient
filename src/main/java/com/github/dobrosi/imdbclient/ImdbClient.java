@@ -3,6 +3,7 @@ package com.github.dobrosi.imdbclient;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -34,9 +35,9 @@ public class ImdbClient {
             Elements titleElement = doc.select("span.hero__primary-text");
             movie.title = titleElement.text();
             movie.image = getValue(doc, "image");
-            //String[] words = getValue(doc, "title").split(" ⭐ ");
-            //movie.year = words[0].split(" \\(")[1].split("\\)")[0];
-            //movie.rating = words[1].split(" | ")[0];
+            String[] words = getValue(doc, "title").split(" ⭐ ");
+            movie.year = words[0].split(" \\(")[1].split("\\)")[0];
+            movie.rating = words[1].split(" | ")[0];
             return movie;
         } catch (HttpStatusException e) {
             throw new ImdbRecordNotFound(imdbid, e.getStatusCode());
@@ -50,6 +51,6 @@ public class ImdbClient {
     }
 
     private String getValue(Document document, String key) throws UnsupportedEncodingException {
-        return new String(document.selectXpath("//meta[@property=\"og:" + key + "\"]").attr("content").getBytes(), "UTF8");
+        return new String(document.selectXpath("//meta[@property=\"og:" + key + "\"]").attr("content").getBytes(), StandardCharsets.UTF_8);
     }
 }
