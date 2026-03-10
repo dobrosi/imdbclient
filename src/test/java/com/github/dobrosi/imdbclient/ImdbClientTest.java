@@ -9,10 +9,10 @@ class ImdbClientTest {
     @Test
     void getMovie() {
         ImdbClient.Movie m = new ImdbClient().getMovie("tt7286456");
-        assertEquals("https://www.imdb.com/title/tt7286456", m.link);
+        assertEquals("https://www.imdb.com/title/tt7286456", m.getLink());
         assertEquals("Joker", m.title);
         assertEquals("2019", m.year);
-        assertNotNull(m.rating);
+        assertNotNull(m.ratings);
         assertNull(m.director);
     }
 }

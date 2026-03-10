@@ -1,56 +1,59 @@
-
 package com.github.dobrosi.imdbclient;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jsoup.HttpStatusException;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
 
 import static java.lang.String.format;
 
 public class ImdbClient {
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Movie {
+        public static class Rate {
+            @JsonProperty("Source")
+            public String source;
+            @JsonProperty("Value")
+            public String value;
+        }
+        @JsonProperty("imdbID")
         public String id;
+        @JsonProperty("Title")
         public String title;
+        @JsonProperty("Year")
         public String year;
         public String director;
-        public String actor;
-        public String genre;
-        public String link;
-        public String description;
-        public String rating;
+        @JsonProperty("Poster")
         public String image;
+        @JsonProperty("Ratings")
+        public List<Rate> ratings;
+        @JsonProperty
+        public String getLink() {
+            return String.format("https://www.imdb.com/title/%s", id);
+        }
     }
 
     public Movie getMovie(String imdbid) {
-        try {
-            Movie movie = new Movie();
-            movie.id = imdbid;
-            movie.link = getLink(imdbid);
-            Document doc = Jsoup.connect(movie.link).get();
-            Elements titleElement = doc.select("span.hero__primary-text");
-            movie.title = titleElement.text();
-            movie.image = getValue(doc, "image");
-            String[] words = getValue(doc, "title").split(" ⭐ ");
-            movie.year = words[0].split(" \\(")[1].split("\\)")[0];
-            movie.rating = words[1].split(" | ")[0];
-            return movie;
-        } catch (HttpStatusException e) {
-            throw new ImdbRecordNotFound(imdbid, e.getStatusCode());
-        } catch (IOException e) {
+        try(HttpClient client = HttpClient.newHttpClient()) {
+            return new ObjectMapper().readValue(client.send(
+                    HttpRequest.newBuilder()
+                            .uri(URI.create(getLink(imdbid)))
+                            .GET()
+                            .build(),
+                    HttpResponse.BodyHandlers.ofString()).body(), Movie.class);
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
     public String getLink(final String imdbid) {
-        return format("https://www.imdb.com/title/%s", imdbid);
-    }
-
-    private String getValue(Document document, String key) throws UnsupportedEncodingException {
-        return new String(document.selectXpath("//meta[@property=\"og:" + key + "\"]").attr("content").getBytes(), StandardCharsets.UTF_8);
+        return format("http://www.omdbapi.com/?i=%s&apikey=e7bd1fc7", imdbid);
     }
 }
